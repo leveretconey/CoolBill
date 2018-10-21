@@ -1,9 +1,10 @@
 package Util;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class BillItem {
-    private Date date;
+    private Calendar date;
     private double amount;
     private String mainType;
     private String SubType;
@@ -12,28 +13,20 @@ public class BillItem {
     @Override
     public String toString() {
         return "BillItem{" +
-                "date=" + date +
-                ", amount=" + amount +
+                "amount=" + amount +
+                ", date=" + date +
                 ", mainType='" + mainType + '\'' +
                 ", SubType='" + SubType + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }
 
-    public BillItem(Date date, double amount, String mainType, String subType, String description) {
-        this.date = date;
-        this.amount = amount;
-        this.mainType = mainType;
-        SubType = subType;
-        this.description = description;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public void setDate(Calendar date) {
+        this.date = date;
     }
 
     public void setMainType(String mainType) {
@@ -48,13 +41,13 @@ public class BillItem {
         this.description = description;
     }
 
-    public Date getDate() {
+    public double getAmount() {
 
-        return date;
+        return amount;
     }
 
-    public double getAmount() {
-        return amount;
+    public Calendar getDate() {
+        return date;
     }
 
     public String getMainType() {
@@ -67,5 +60,13 @@ public class BillItem {
 
     public String getDescription() {
         return description;
+    }
+
+    public BillItem(Calendar date, double amount, String mainType, String subType, String description) {
+        this.date = date;
+        this.amount = amount;
+        this.mainType = mainType;
+        SubType = subType;
+        this.description = description;
     }
 }
