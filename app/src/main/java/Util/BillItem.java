@@ -4,29 +4,51 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class BillItem {
-    private Calendar date;
+    private int year;
+    private int month;
+    private int day;
     private double amount;
     private String mainType;
     private String SubType;
     private String description;
 
+    public BillItem(int year, int month, int day, double amount, String mainType, String subType, String description) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.amount = amount;
+        this.mainType = mainType;
+        SubType = subType;
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "BillItem{" +
-                "amount=" + amount +
-                ", date=" + date +
+                "year=" + year +
+                ", month=" + month +
+                ", day=" + day +
+                ", amount=" + amount +
                 ", mainType='" + mainType + '\'' +
                 ", SubType='" + SubType + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setYear(int year) {
+        this.year = year;
     }
 
-    public void setDate(Calendar date) {
-        this.date = date;
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public void setMainType(String mainType) {
@@ -41,13 +63,21 @@ public class BillItem {
         this.description = description;
     }
 
-    public double getAmount() {
+    public int getYear() {
 
-        return amount;
+        return year;
     }
 
-    public Calendar getDate() {
-        return date;
+    public int getMonth() {
+        return month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public double getAmount() {
+        return amount;
     }
 
     public String getMainType() {
@@ -60,13 +90,5 @@ public class BillItem {
 
     public String getDescription() {
         return description;
-    }
-
-    public BillItem(Calendar date, double amount, String mainType, String subType, String description) {
-        this.date = date;
-        this.amount = amount;
-        this.mainType = mainType;
-        SubType = subType;
-        this.description = description;
     }
 }
