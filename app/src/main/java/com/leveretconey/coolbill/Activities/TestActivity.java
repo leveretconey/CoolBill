@@ -10,7 +10,7 @@ import com.leveretconey.coolbill.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import Util.MonthItemAdapter;
+import Share.MonthItemAdapter;
 
 public class TestActivity extends AppCompatActivity {
 

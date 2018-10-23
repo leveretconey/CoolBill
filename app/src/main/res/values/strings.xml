@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CoolBill</string>
+    <string name="year_month_day">%1$d年%2$d月%3$d日</string>
 </resources>

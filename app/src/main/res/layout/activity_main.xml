@@ -12,16 +12,88 @@
         android:layout_width="match_parent"
         >
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
+            <android.support.v7.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:id="@+id/main_toolbar">
+
+            </android.support.v7.widget.Toolbar>
+
+
+
+            <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:id="@+id/bill_detail_recycle_view"
+                >
+
+
+           </android.support.v7.widget.RecyclerView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="没有找到内容"
+                android:gravity="center"
+                android:id="@+id/main_find_nothing" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:background="@drawable/main_bottom_background"
+                android:layout_height="wrap_content"
+                android:id="@+id/main_bottom_board"
+                android:visibility="gone"
+                android:orientation="vertical"
+                >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/main_description_text_view"
+                    android:textColor="@color/colorWhite"
+                    android:background="@drawable/main_bottom_background"
+                    android:padding="15px"
+                    />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    >
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/main_delete_button"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginLeft="30dp"
+                        android:text="删除" />
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/main_modify_button"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="30dp"
+                        android:text="修改" />
+                </RelativeLayout>
+
+            </LinearLayout>
+        </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/add"
-            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_margin="20dp"
-            android:id="@+id/add_bill_button"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="30dp"
+            android:id="@+id/main_add_bill_button"
             />
     </RelativeLayout>
 <!--主界面和左侧拉出界面的分界线-->
@@ -30,7 +102,7 @@
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:layout_gravity="left"
-        android:background="#ffffff"
+        android:background="@color/colorWhite"
         >
 
         <include layout="@layout/date_selection_layout" />

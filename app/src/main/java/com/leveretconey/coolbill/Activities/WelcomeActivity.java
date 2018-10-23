@@ -3,7 +3,6 @@ package com.leveretconey.coolbill.Activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -11,21 +10,12 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.leveretconey.coolbill.R;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import Util.HttpUtil;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "WelcomeActivity";
-    public static final int TOTAL_TIME_FOR_SKIP=5;
+    public static final int TOTAL_TIME_FOR_SKIP=1;
     int remainingTime =TOTAL_TIME_FOR_SKIP;
 
     Timer timer;
@@ -61,12 +51,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                try{
+                if(false){
                     Glide.with(WelcomeActivity.this)
                             .load("https://cn.bing.com/az/hprichbg/rb/VallettaMalta_ZH-CN11321825930_1920x1080.jpg")
                             .into(imageView);
                 }
-                catch (Exception e){
+                else{
                     Glide.with(WelcomeActivity.this).load(R.drawable.waifu).into(imageView);
                 }
             }

@@ -1,9 +1,9 @@
-package Util;
+package Share;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.io.Serializable;
 
-public class BillItem {
+public class BillItem implements Serializable{
+    private int id;
     private int year;
     private int month;
     private int day;
@@ -12,20 +12,11 @@ public class BillItem {
     private String SubType;
     private String description;
 
-    public BillItem(int year, int month, int day, double amount, String mainType, String subType, String description) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.amount = amount;
-        this.mainType = mainType;
-        SubType = subType;
-        this.description = description;
-    }
-
     @Override
     public String toString() {
         return "BillItem{" +
-                "year=" + year +
+                "id=" + id +
+                ", year=" + year +
                 ", month=" + month +
                 ", day=" + day +
                 ", amount=" + amount +
@@ -33,6 +24,10 @@ public class BillItem {
                 ", SubType='" + SubType + '\'' +
                 ", description='" + description + '\'' +
                 '}';
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setYear(int year) {
@@ -63,8 +58,12 @@ public class BillItem {
         this.description = description;
     }
 
-    public int getYear() {
+    public int getId() {
 
+        return id;
+    }
+
+    public int getYear() {
         return year;
     }
 
@@ -90,5 +89,17 @@ public class BillItem {
 
     public String getDescription() {
         return description;
+    }
+
+    public BillItem(int id, int year, int month, int day, double amount, String mainType, String subType, String description) {
+
+        this.id = id;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.amount = amount;
+        this.mainType = mainType;
+        SubType = subType;
+        this.description = description;
     }
 }

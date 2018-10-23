@@ -1,4 +1,4 @@
-package Util;
+package Share;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.leveretconey.coolbill.Activities.MainActivity;
 import com.leveretconey.coolbill.R;
 
 import java.util.ArrayList;
