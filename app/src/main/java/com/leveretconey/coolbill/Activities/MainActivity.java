@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Layout;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -141,16 +142,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             }
         });
-        ((TextView)findViewById(R.id.date_selection_title))
-                .setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return false;
-            }
-        });
     }
     void bindDrawerEvents(){
         DrawerLayout drawer=findViewById(R.id.main_draw);
+        drawer.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                return false;
+            }
+
+        });
     }
     void refreshDateSelectionLayout() {
         yearsRecycleView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
