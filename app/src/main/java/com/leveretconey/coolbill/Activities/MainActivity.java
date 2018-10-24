@@ -13,13 +13,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Layout;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -72,36 +70,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bottomRelativeLayout = (LinearLayout) findViewById(R.id.main_bottom_board);
         descriptionTextView = (TextView) findViewById(R.id.main_description_text_view);
         addButton = (FloatingActionButton) findViewById(R.id.main_add_bill_button);
-
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         bindListeners();
+        monthSelected=yearSelected=Integer.MIN_VALUE;
     }
 
-    void refreshAll() {
-        refreshYearMonthAvailable();
-        refreshSelectedBillItems();
-
-        refreshAllDetailSelection();
-
+    public void refreshAll() {
+        refreshBillItemDetail();
         refreshDateSelectionLayout();
-        refreshBillItemsDetail();
-
-
-        switchSelectedBillItemDetail(null, null);
-        //todo
-        tryLogAllDataInDataBase();
     }
+    public void refreshBillItemDetail(){
+        queryBillItems();
+        refreshBillItemsDetailRecycleView();
+        switchSelectedBillItemDetail(null, null);
+    }
+    final String[] columns=new String[]{"id","year","month","day","amount",
+            "mainType","subType","description"};
+    private void queryBillItems() {
 
-    void refreshSelectedBillItems() {
-        //todo
         SQLiteDatabase db = Global.dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("select * from BillItem;", null);
+        String selections=null;
+        String[] selectionArgs=null;
+        if(monthSelected!=Integer.MIN_VALUE){
+            selections="year=? and month=?";
+            selectionArgs=new String[]{String.valueOf(yearSelected)
+                                    ,String.valueOf(monthSelected)};
+        }else if (yearSelected!=Integer.MIN_VALUE){
+            selections="year=?";
+            selectionArgs=new String[]{String.valueOf(yearSelected)};
+        }
+        Cursor cursor = db.query("BillItem",columns,selections,selectionArgs,
+                null,null,"year,month,day");
         queriedBillItems = getAllBillItemsFromCursor(cursor);
     }
 
-    void refreshBillItemsDetail() {
+    private void refreshBillItemsDetailRecycleView() {
         if (queriedBillItems.size() == 0) {
             billItemDetailNoneTextView.setVisibility(View.VISIBLE);
             billItemDetailRecycleView.setVisibility(View.GONE);
@@ -110,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             billItemDetailNoneTextView.setVisibility(View.GONE);
             billItemDetailRecycleView.setVisibility(View.VISIBLE);
             billItemDetailRecycleView.setLayoutManager(new LinearLayoutManager(this));
-
             billItemDetailRecycleView.setAdapter(new BillItemDetailAdapter(this, queriedBillItems));
         }
     }
@@ -137,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    selectYearMonth(Integer.MIN_VALUE,Integer.MIN_VALUE);
+                    resetSelect();
                 }
                 return false;
             }
@@ -145,23 +148,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     void bindDrawerEvents(){
         DrawerLayout drawer=findViewById(R.id.main_draw);
-        drawer.setOnDragListener(new View.OnDragListener() {
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                return false;
-            }
-
-        });
+        //todo
     }
     void refreshDateSelectionLayout() {
+        selectYearMonth(Integer.MIN_VALUE,Integer.MIN_VALUE);
+        refreshYearMonthAvailable();
         yearsRecycleView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         yearItemAdapter = new YearItemAdapter(yearMonthAvailable, this);
         yearsRecycleView.setAdapter(yearItemAdapter);
-    }
-
-    void refreshAllDetailSelection() {
 
     }
+
+
 
     private void tryLogAllDataInDataBase() {
         try {
@@ -244,10 +242,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ModifyActivity.startAction(this, selectedBillItem);
                 }
                 break;
-            case R.id.bill_detail_recycle_view:
-                Log.d(TAG, "onClick: click!!");
-                switchSelectedBillItemDetail(null, null);
-                break;
             case R.id.main_delete_button:
                 deleteSelectedBillItem();
                 break;
@@ -256,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    void deleteSelectedBillItem() {
+    private void deleteSelectedBillItem() {
         if (selectedBillItem != null) {
             new AlertDialog.Builder(this)
                     .setTitle("删除")
@@ -269,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 db.delete("BillItem", "id=?"
                                         , new String[]{String.valueOf(selectedBillItem.getId())});
                                 switchSelectedBillItemDetail(null, null);
-                                refreshAll();
+                                refreshDetailAndRefreshDateIFNecessary();
                             } catch (Exception e) {
                                 Util.showSimpleAlert(MainActivity.this,
                                         "失败", "发生错误");
@@ -280,15 +274,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .create().show();
         }
     }
-
+    private void refreshDetailAndRefreshDateIFNecessary(){
+        queryBillItems();
+        if(queriedBillItems.size()==0){
+            resetSelect();
+        }
+        refreshBillItemDetail();
+        refreshDateSelectionLayout();
+    }
+    private void resetSelect(){
+        selectYearMonth(Integer.MIN_VALUE,Integer.MIN_VALUE);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode) {
             case ModifyActivity.RESULT_CODE:
 
-                boolean needToRefresh = data.getBooleanExtra(ModifyActivity.RESULT_NAME, false);
+                boolean needToRefresh = data.getBooleanExtra(ModifyActivity.RESULT_NAME, true);
                 if (needToRefresh) {
-                    refreshAll();
+                    refreshDetailAndRefreshDateIFNecessary();
                 }
                 break;
             default:
@@ -341,11 +345,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private int yearSelected = Integer.MIN_VALUE;
-    private int monthSelected = Integer.MIN_VALUE;
+    private int yearSelected ;
+    private int monthSelected ;
 
     public void selectYearMonth(int year, int month) {
-        boolean needToRefershData=false;
         if (yearSelected != Integer.MIN_VALUE) {
             RelativeLayout yearLayout = (RelativeLayout)yearItemAdapter
                     .getYearItemLayout(yearSelected).getChildAt(0);
@@ -363,7 +366,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!(year == Integer.MIN_VALUE       ||
              (month==Integer.MIN_VALUE && year == yearSelected)))
         {
-            RelativeLayout yearLayout = (RelativeLayout) yearItemAdapter.getYearItemLayout(year).getChildAt(0);
+            RelativeLayout yearLayout = (RelativeLayout) yearItemAdapter
+                    .getYearItemLayout(year).getChildAt(0);
             if (yearLayout != null) {
                 yearLayout.setBackground(getDrawable(R.drawable.month_item_selected_background));
             }
@@ -381,6 +385,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }else {
             yearSelected=Integer.MIN_VALUE;
         }
+        if (yearSelected==Integer.MIN_VALUE)
+            monthSelected=Integer.MIN_VALUE;
+
+        Log.d(TAG, "selectYearMonth: "+yearSelected+" "+monthSelected);
     }
 
 }
