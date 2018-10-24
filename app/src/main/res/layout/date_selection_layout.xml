@@ -3,24 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-<TextView
-    android:gravity="center"
-    android:id="@+id/date_selection_title"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="3"
-    android:text="选择一个时间"
-    android:layout_gravity="center"
-
-    android:layout_marginTop="20dp"/>
-<android.support.v7.widget.RecyclerView
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="7"
-    android:id="@+id/years_recycle_view"
+    android:orientation="vertical"
     >
+    <TextView
+        android:gravity="center"
+        android:id="@+id/date_selection_title"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="选择一个时间"
+        android:background="#312891"
+        android:textSize="20dp"
+        android:layout_gravity="center"
 
-
-</android.support.v7.widget.RecyclerView>
+        android:layout_marginTop="20dp"/>
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8"
+        android:id="@+id/years_recycle_view"
+        >
+    </android.support.v7.widget.RecyclerView>
 </LinearLayout>

@@ -73,6 +73,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     void startMainActivity(){
         Intent intent=new Intent(WelcomeActivity.this,MainActivity.class);
         startActivity(intent);
+        timer.cancel();
         finish();
     }
 
