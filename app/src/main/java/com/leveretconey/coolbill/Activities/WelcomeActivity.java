@@ -38,7 +38,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void run() {
                 remainingTime--;
-                if(remainingTime == 0){
+                if(remainingTime == -1){
                     startMainActivity();
                 }else {
                     updateButtonText();

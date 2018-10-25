@@ -8,10 +8,7 @@
     android:id="@+id/main_draw"
     tools:context=".Activities.MainActivity">
 
-    <RelativeLayout
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        >
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -23,6 +20,7 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/colorPrimary"
                 android:id="@+id/main_toolbar">
+
 
             </android.support.v7.widget.Toolbar>
 
@@ -85,18 +83,6 @@
 
             </LinearLayout>
         </LinearLayout>
-
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/add"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="30dp"
-            android:layout_marginRight="30dp"
-            android:id="@+id/main_add_bill_button"
-            />
-    </RelativeLayout>
 <!--主界面和左侧拉出界面的分界线-->
 
     <LinearLayout

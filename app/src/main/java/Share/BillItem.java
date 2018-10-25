@@ -1,6 +1,10 @@
 package Share;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class BillItem implements Serializable{
     private int id;
@@ -101,5 +105,14 @@ public class BillItem implements Serializable{
         this.mainType = mainType;
         SubType = subType;
         this.description = description;
+    }
+    public static String toJson(List<BillItem> billItems){
+        Gson gson=new Gson();
+        return gson.toJson(billItems);
+
+    }
+    public static List<BillItem> fromJson(String json){
+        Gson gson=new Gson();
+        return gson.fromJson(json,new TypeToken<List<BillItem>>(){}.getType());
     }
 }

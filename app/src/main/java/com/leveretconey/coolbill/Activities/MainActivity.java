@@ -15,6 +15,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -25,13 +27,16 @@ import android.widget.TextView;
 import com.leveretconey.coolbill.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import Share.BillItemDetailAdapter;
 import Share.Global;
 import Share.BillItem;
+import Share.HttpUtil;
 import Share.Util;
 import Share.YearItemAdapter;
 
@@ -59,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView billItemDetailNoneTextView;
     private LinearLayout bottomRelativeLayout;
     private TextView descriptionTextView;
-    private FloatingActionButton addButton;
     private YearItemAdapter yearItemAdapter;
 
     @SuppressWarnings("all")
@@ -69,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         billItemDetailNoneTextView = (TextView) findViewById(R.id.main_find_nothing);
         bottomRelativeLayout = (LinearLayout) findViewById(R.id.main_bottom_board);
         descriptionTextView = (TextView) findViewById(R.id.main_description_text_view);
-        addButton = (FloatingActionButton) findViewById(R.id.main_add_bill_button);
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         bindListeners();
@@ -122,7 +125,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     void bindListeners() {
         bindDrawerEvents();
 
-        addButton.setOnClickListener(this);
         ((Button) findViewById(R.id.main_modify_button)).setOnClickListener(this);
         ((Button) findViewById(R.id.main_delete_button)).setOnClickListener(this);
 
@@ -178,11 +180,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String QUERY_YEAR_MONTH = "select year,month from BillItem " +
             "group by year,month";
-    private int latestYear, latestMonth;
 
     void refreshYearMonthAvailable() {
         yearMonthAvailable.clear();
-        latestMonth = latestYear = Integer.MIN_VALUE;
         SQLiteDatabase db = Global.dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(QUERY_YEAR_MONTH, null);
         int yearIndex = cursor.getColumnIndex("year");
@@ -194,10 +194,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 yearMonthAvailable.put(year, new TreeSet<Integer>());
             }
             yearMonthAvailable.get(year).add(month);
-            if (year > latestYear || (year == latestYear && month > latestMonth)) {
-                latestYear = year;
-                latestMonth = month;
-            }
         }
         cursor.close();
     }
@@ -234,9 +230,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.main_add_bill_button:
-                ModifyActivity.startAction(MainActivity.this, null);
-                break;
             case R.id.main_modify_button:
                 if (selectedBillItem != null) {
                     ModifyActivity.startAction(this, selectedBillItem);
@@ -329,8 +322,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void toggleYearItem(int year) {
-        LinearLayout yearItemLayout = (LinearLayout)
-            yearItemAdapter.getYearItemLayout(year);
+        LinearLayout yearItemLayout = yearItemAdapter.getYearItemLayout(year);
         if (yearItemLayout != null) {
             Button button = (Button) yearItemLayout.findViewById(R.id.year_toggle);
             LinearLayout monthLayout = (LinearLayout)
@@ -387,8 +379,95 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (yearSelected==Integer.MIN_VALUE)
             monthSelected=Integer.MIN_VALUE;
-
+//todo
         Log.d(TAG, "selectYearMonth: "+yearSelected+" "+monthSelected);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.main_add_bill_button:
+                ModifyActivity.startAction(MainActivity.this, null);
+                break;
+            case R.id.main_statistics:
+                showStatistics();
+                break;
+            case R.id.main_backup:
+                backupData();
+                break;
+            case R.id.main_recover:
+                recoverData();
+                break;
+            case R.id.main_options:
+                OptionsActivity.startAction(this);
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+    private  void backupData(){
+
+    }
+    private void recoverData(){
+
+    }
+    private HashMap<String,Double> getAmountAccordingToMainType(List<BillItem> billItems){
+        HashMap<String,Double> mainType2sum=new HashMap<>();
+        for (BillItem billItem : billItems) {
+            String mainType = billItem.getMainType();
+
+            if (!mainType2sum.containsKey(mainType)) {
+                mainType2sum.put(mainType, 0.0);
+            }
+            mainType2sum.put(mainType, mainType2sum.get(mainType) + billItem.getAmount());
+        }
+        return mainType2sum;
+    }
+    private void showStatistics(){
+        StringBuilder title=new StringBuilder(),message=new StringBuilder();
+
+        if(queriedBillItems.size()==0){
+            title.append("提示");
+            message.append("查找不到任何记录哦");
+        }else {
+            if (yearSelected==Integer.MIN_VALUE){
+                int  earlyYear=Integer.MAX_VALUE,earlyMonth=Integer.MAX_VALUE
+                    ,lateYear=Integer.MIN_VALUE,lateMonth=Integer.MIN_VALUE;
+                for(BillItem billItem :queriedBillItems) {
+                    int year = billItem.getYear(), month = billItem.getMonth();
+                    if (year<earlyYear ||(year==earlyYear && month < earlyMonth)){
+                        earlyMonth=month;
+                        earlyYear=year;
+                    }
+                    if (year > lateYear | (year==lateYear && month > lateMonth)){
+                        lateMonth=month;
+                        lateYear=year;
+                    }
+                }
+                title.append(earlyYear).append("年").append(earlyMonth).append("月")
+                     .append("---")
+                     .append(lateYear).append("年").append(lateMonth).append("月");
+            }else{
+                title.append(yearSelected).append("年");
+                if (monthSelected !=Integer.MIN_VALUE){
+                    title.append(monthSelected).append("月");
+                }
+            }
+            HashMap<String,Double> mainType2sum=getAmountAccordingToMainType(queriedBillItems);
+            for(Map.Entry<String,Double> entry : mainType2sum.entrySet()){
+                message.append(entry.getKey()).append(":").append(entry.getValue())
+                        .append("\n");
+            }
+        }
+        Share.Util.showSimpleAlert(this,title.toString(),message.toString());
+    }
 }
+//todo
+//直接点击年份不会使得数据刷新的bug

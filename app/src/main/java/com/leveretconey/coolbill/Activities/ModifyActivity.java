@@ -73,25 +73,26 @@ public class ModifyActivity extends AppCompatActivity implements View.OnClickLis
                 switch (state) {
                     case INSERT:
                         db.insert("BillItem", null, contentValues);
-                        message = "新记录插入完成";
+                       // message = "新记录插入完成";
                         break;
                     case UPDATE:
                         db.update("BillItem",contentValues,
                                 "id=?",new String[]{String.valueOf(billItem.getId())});
-                        message="记录修改完成";
+                        //message="记录修改完成";
                 }
-                new android.support.v7.app.AlertDialog.Builder(this)
-                        .setTitle("成功")
-                        .setMessage(message)
-                        .setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                returnMainActivity(true);
-                            }
-                        })
-                        .setCancelable(false)
-                        .create()
-                        .show();
+//                new android.support.v7.app.AlertDialog.Builder(this)
+//                        .setTitle("成功")
+//                        .setMessage(message)
+//                        .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                returnMainActivity(true);
+//                            }
+//                        })
+//                        .setCancelable(false)
+//                        .create()
+//                        .show();
+                returnMainActivity(true);
             }catch (Exception e){
                 e.printStackTrace();
                 Util.showSimpleAlert(this,"失败","发生错误");

@@ -124,6 +124,7 @@ public class YearItemAdapter extends RecyclerView.Adapter<YearItemAdapter.ViewHo
             @Override
             public void onClick(View v) {
                 context.selectYearMonth(year,Integer.MIN_VALUE);
+                context.refreshBillItemDetail();
             }
         });
     }

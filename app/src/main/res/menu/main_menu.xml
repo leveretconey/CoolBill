@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/main_add_bill_button"
+        android:title="增加"
+        app:showAsAction="always"
+        android:icon="@drawable/add"
+        />
+    <item
+        android:id="@+id/main_options"
+        app:showAsAction="always"
+        android:title="设置"
+        android:icon="@drawable/options"
+        />
+    <item android:id="@+id/main_statistics"
+        android:title="分类统计"
+        app:showAsAction="never"
+        />
+    <item android:id="@+id/main_backup"
+        android:title="备份到服务器"
+        app:showAsAction="never"
+        />
+    <item android:id="@+id/main_recover"
+        android:title="从服务器恢复"
+        app:showAsAction="never"
+        />
+</menu>

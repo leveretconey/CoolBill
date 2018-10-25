@@ -13,6 +13,7 @@ public class Global {
             initialied=true;
             dbHelper=new DBHelper(context,
                     "BillItem.db",null,1);
+            Options.getInstance().initialize(context);
         }
     }
 }
