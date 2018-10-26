@@ -18,12 +18,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.MainActivity"></activity>
-        <activity android:name=".Activities.TestActivity"></activity>
+        <activity android:name=".Activities.MainActivity" />
+        <activity android:name=".Activities.TestActivity" />
         <activity
             android:name=".Activities.ModifyActivity"
-            android:launchMode="singleInstance"></activity>
-        <activity android:name=".Activities.OptionsActivity"></activity>
+            android:launchMode="singleInstance" />
+        <activity android:name=".Activities.OptionsActivity" />
+        <activity android:name=".Activities.WaitingActivity"
+            android:launchMode="singleInstance"
+            />
     </application>
 
 </manifest>

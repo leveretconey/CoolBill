@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="历史统计"
+        android:textSize="20sp"
+        android:layout_margin="30dp"
+        android:fadeScrollbars="true"
+        />
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="10dp"
+            android:fadeScrollbars="true"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/line"
+                android:id="@+id/history_image"
+                android:scaleType="centerCrop"
+                />
+        </HorizontalScrollView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="退出"
+        android:layout_margin="30dp"
+        android:id="@+id/history_quit"
+        android:textSize="14sp"
+        android:textColor="#cc3333"
+        android:layout_gravity="center"
+        />
+</LinearLayout>

@@ -79,4 +79,7 @@ public class Options{
 
         }
     }
+    public String getBackupServerUrl(){
+        return ipAddress+":"+String.valueOf(port);
+    }
 }

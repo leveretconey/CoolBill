@@ -71,9 +71,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
     void startMainActivity(){
+        timer.cancel();
         Intent intent=new Intent(WelcomeActivity.this,MainActivity.class);
         startActivity(intent);
-        timer.cancel();
         finish();
     }
 
@@ -86,7 +86,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.welcome_skip_button:
-                startMainActivity();
+                remainingTime=0;
                 break;
             default:break;
         }

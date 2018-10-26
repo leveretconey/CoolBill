@@ -1,11 +1,13 @@
 package com.leveretconey.coolbill.Activities;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,18 +16,20 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.DragEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.leveretconey.coolbill.R;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +41,12 @@ import Share.BillItemDetailAdapter;
 import Share.Global;
 import Share.BillItem;
 import Share.HttpUtil;
+import Share.Options;
 import Share.Util;
 import Share.YearItemAdapter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -53,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //todo
         Global.appInitialization(this);
         initializeOnce();
         refreshAll();
@@ -84,13 +91,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         refreshDateSelectionLayout();
     }
     public void refreshBillItemDetail(){
-        queryBillItems();
+        queryBillItemsUsingConditions();
         refreshBillItemsDetailRecycleView();
         switchSelectedBillItemDetail(null, null);
     }
     final String[] columns=new String[]{"id","year","month","day","amount",
             "mainType","subType","description"};
-    private void queryBillItems() {
+    private void queryBillItemsUsingConditions() {
 
         SQLiteDatabase db = Global.dbHelper.getReadableDatabase();
         String selections=null;
@@ -160,24 +167,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         yearsRecycleView.setAdapter(yearItemAdapter);
 
     }
-
-
-
-    private void tryLogAllDataInDataBase() {
-        try {
-            SQLiteDatabase db = Global.dbHelper.getReadableDatabase();
-            Cursor cursor = db.rawQuery("select * from BillItem;", null);
-            List<BillItem> billItems = getAllBillItemsFromCursor(cursor);
-            for (BillItem billItem : billItems) {
-                Log.d(TAG, "tryLogAllDataInDataBase: " + billItem);
-            }
-            Log.d(TAG, "tryLogAllDataInDataBase: \n\n\n\n");
-        } catch (Exception e) {
-            Log.d(TAG, "tryLogAllDataInDataBase: error");
-        }
-
-    }
-
     private static final String QUERY_YEAR_MONTH = "select year,month from BillItem " +
             "group by year,month";
 
@@ -268,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
     private void refreshDetailAndRefreshDateIFNecessary(){
-        queryBillItems();
+        queryBillItemsUsingConditions();
         if(queriedBillItems.size()==0){
             resetSelect();
         }
@@ -379,8 +368,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (yearSelected==Integer.MIN_VALUE)
             monthSelected=Integer.MIN_VALUE;
-//todo
-        Log.d(TAG, "selectYearMonth: "+yearSelected+" "+monthSelected);
     }
 
     @Override
@@ -407,16 +394,75 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_options:
                 OptionsActivity.startAction(this);
                 break;
+            case R.id.main_history:
+                showHistory();
+                break;
             default:
                 break;
         }
         return true;
     }
-    private  void backupData(){
+    private void showHistory(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        LayoutInflater inflater=getLayoutInflater();
+        View view=inflater.inflate(R.layout.history_layout,null);
+        final Dialog dialog=builder.create();
+        dialog.show();
+        dialog.getWindow().setContentView(view);
+        ((ImageView)findViewById(R.id.history_image)).setImageBitmap(makeHistoryGraph());
+        ((TextView)view.findViewById(R.id.history_quit)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.cancel();
+            }
+        });
+    }
+    private Bitmap makeHistoryGraph(){
+        String sql="select year,month,sum(amount) as sum from BillItem group by" +
+                " year,month order by year,month;";
+        SQLiteDatabase database=Global.dbHelper.getReadableDatabase();
+        Cursor cursor=database.rawQuery(sql,null);
 
+        return null;
+    }
+
+    private final static String SELECT_ALL="select * from BillItem;";
+    private  void backupData(){
+        //手机和电脑连接不了，先不弄这个功能了
+        //todo
+        final Context context=this;
+        WaitingActivity.startAction(context);
+        SQLiteDatabase database=Global.dbHelper.getReadableDatabase();
+        Cursor cursor=database.rawQuery(SELECT_ALL,null);
+        List<BillItem> billItems=getAllBillItemsFromCursor(cursor);
+        HttpUtil.sendOKHttpRequestPOST(
+            "http://"+Options.getInstance().getBackupServerUrl() + "/cool_bill_server/main",
+            BillItem.toJson(billItems),
+            new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("失败")
+                        .setMessage("备份失败")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                WaitingActivity.endAction(MainActivity.this);
+                            }
+                        });
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Log.d(TAG, "onResponse: succeed");
+                    WaitingActivity.endAction(MainActivity.this);
+                }
+            }
+        );
+        Log.d(TAG, "backupData: request send");
     }
     private void recoverData(){
-
+        //todo
     }
     private HashMap<String,Double> getAmountAccordingToMainType(List<BillItem> billItems){
         HashMap<String,Double> mainType2sum=new HashMap<>();
@@ -469,5 +515,3 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Share.Util.showSimpleAlert(this,title.toString(),message.toString());
     }
 }
-//todo
-//直接点击年份不会使得数据刷新的bug
