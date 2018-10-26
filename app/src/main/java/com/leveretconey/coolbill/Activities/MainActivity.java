@@ -25,9 +25,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.leveretconey.coolbill.R;
@@ -193,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     List<BillItem> getAllBillItemsFromCursor(Cursor cursor) {
-        List<BillItem> billItems = new ArrayList<BillItem>();
+        List<BillItem> billItems = new ArrayList<>();
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 int id = cursor.getColumnIndex("id");
@@ -415,39 +417,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
         dialog.getWindow().setContentView(view);
         ((ImageView)view.findViewById(R.id.history_image)).setImageBitmap(makeHistoryGraph());
+        final HorizontalScrollView scroll=((HorizontalScrollView)view.findViewById(R.id.history_scroll));
+        scroll.fullScroll(ScrollView.FOCUS_DOWN);
         ((TextView)view.findViewById(R.id.history_quit)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.cancel();
             }
         });
+        scroll.post(new Runnable() {
+            @Override
+            public void run() {
+                scroll.scrollTo(scroll.getChildAt(0).getWidth(),0);
+            }
+        });
+
     }
     public static final int COUNT_YEAR_IN_HISTORY=3;
     private Bitmap makeHistoryGraph(){
+        final double THRESHOLD=1000.0;
         HashMap<Integer,HashMap<Integer,Double>> data=prepareHistoryData();
-        double maxSum=0.0;
+        double maxSum=THRESHOLD;
         List<Double> sums=new ArrayList<>();
         List<Integer> years=new ArrayList<>();
         List<Integer> months=new ArrayList<>();
         for (HashMap.Entry<Integer,HashMap<Integer,Double>> entry1:data.entrySet()){
             for (HashMap.Entry<Integer,Double> entry2:entry1.getValue().entrySet()){
-                sums.add(entry2.getValue());
+                double sum=entry2.getValue();
+                if (sum > maxSum){
+                    maxSum=sum;
+                }
+                sums.add(sum);
                 years.add(entry1.getKey());
                 months.add(entry2.getKey());
             }
         }
         int length=years.size();
-        if (maxSum==0.0){
-            maxSum=100.0;
-        }
 
         final int HEIGHT=300;
-        final int textSize=15;
-        final int MONTH_OCCUPY_WIDTH=80;
+        final int MIN_WIDTH=440;
+        final int TEXT_SIZE=15;
+        int MONTH_OCCUPY_WIDTH=80;
         final int TOP=(int)(HEIGHT*0.1),DOWN=(int)(HEIGHT*0.80);
-        final int WIDTH=length * MONTH_OCCUPY_WIDTH;
+        int WIDTH=length * MONTH_OCCUPY_WIDTH;
         final int COUNT_REFERENCE_LINE=5;
         final int INTERVAL=15;
+
+        if (WIDTH <MIN_WIDTH){
+            WIDTH=MIN_WIDTH;
+            MONTH_OCCUPY_WIDTH=WIDTH/length;
+        }
 
         Bitmap bitmap=Bitmap.createBitmap(WIDTH,HEIGHT,Bitmap.Config.ARGB_8888);
         Canvas canvas=new Canvas(bitmap);
@@ -462,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Paint textPaint=new Paint();
         textPaint.setColor(getResources().getColor(R.color.colorBlack));
-        textPaint.setTextSize(textSize);
+        textPaint.setTextSize(TEXT_SIZE);
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         canvas.drawLine(0,DOWN,WIDTH,DOWN,textPaint);

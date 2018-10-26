@@ -71,4 +71,11 @@ public class Util {
             throw e;
         }
     }
+    public static void Sleep(long time){
+        try{
+            Thread.sleep(time);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }
