@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.leveretconey.coolbill.R;
 
 import java.io.IOException;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -424,7 +425,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final int COUNT_YEAR_IN_HISTORY=3;
     private Bitmap makeHistoryGraph(){
         HashMap<Integer,HashMap<Integer,Double>> data=prepareHistoryData();
-        Double maxSum=0.0;
+        double maxSum=0.0;
         List<Double> sums=new ArrayList<>();
         List<Integer> years=new ArrayList<>();
         List<Integer> months=new ArrayList<>();
@@ -443,10 +444,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final int HEIGHT=300;
         final int textSize=15;
         final int MONTH_OCCUPY_WIDTH=80;
-        final int TOP=(int)(HEIGHT*0.15),DOWN=(int)(HEIGHT*0.85);
+        final int TOP=(int)(HEIGHT*0.1),DOWN=(int)(HEIGHT*0.80);
         final int WIDTH=length * MONTH_OCCUPY_WIDTH;
+        final int COUNT_REFERENCE_LINE=5;
+        final int INTERVAL=15;
 
-        Bitmap bitmap=Bitmap.createBitmap(100,WIDTH,Bitmap.Config.ARGB_8888);
+        Bitmap bitmap=Bitmap.createBitmap(WIDTH,HEIGHT,Bitmap.Config.ARGB_8888);
         Canvas canvas=new Canvas(bitmap);
 
         Paint linePaint=new Paint();
@@ -460,9 +463,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Paint textPaint=new Paint();
         textPaint.setColor(getResources().getColor(R.color.colorBlack));
         textPaint.setTextSize(textSize);
+        textPaint.setTextAlign(Paint.Align.CENTER);
 
         canvas.drawLine(0,DOWN,WIDTH,DOWN,textPaint);
 
+        float dy=(DOWN-TOP)/(COUNT_REFERENCE_LINE);
+        for(int i=1;i<=COUNT_REFERENCE_LINE;i++){
+            float y=-i * dy + DOWN;
+            canvas.drawLine(0,y,WIDTH,y,bgPaint);
+        }
+        double pixelPerSum=(DOWN-TOP)/maxSum;
+        for(int i=0;i<length;i++){
+            float x1=i * MONTH_OCCUPY_WIDTH+MONTH_OCCUPY_WIDTH/2.0f;
+            float y1=DOWN-(float) (sums.get(i) * pixelPerSum);
+            canvas.drawCircle(x1,y1,4,linePaint);
+            canvas.drawText(String.valueOf(sums.get(i)),x1,y1-INTERVAL,textPaint);
+            canvas.drawText(String.valueOf(years.get(i)+"年"),x1,DOWN+INTERVAL+3,textPaint);
+            canvas.drawText(String.valueOf(months.get(i)+"月"),x1,DOWN+2*INTERVAL+5,textPaint);
+            if(i > 0){
+                float x2=x1-MONTH_OCCUPY_WIDTH;
+                float y2=DOWN-(float) (sums.get(i-1) * pixelPerSum);
+                canvas.drawLine(x1,y1,x2,y2,linePaint);
+            }
+
+        }
         return bitmap;
     }
     HashMap<Integer,HashMap<Integer,Double>> prepareHistoryData(){
@@ -527,7 +551,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             map.put(todayYear,new HashMap<Integer, Double>());
             map.get(todayYear).put(todayMonth,0.0);
         }
-        Log.d(TAG, "prepareHistoryData: "+map);
         cursor.close();
         return map;
     }
