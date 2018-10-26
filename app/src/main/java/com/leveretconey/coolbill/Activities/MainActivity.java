@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +34,7 @@ import com.leveretconey.coolbill.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -409,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final Dialog dialog=builder.create();
         dialog.show();
         dialog.getWindow().setContentView(view);
-        ((ImageView)findViewById(R.id.history_image)).setImageBitmap(makeHistoryGraph());
+        ((ImageView)view.findViewById(R.id.history_image)).setImageBitmap(makeHistoryGraph());
         ((TextView)view.findViewById(R.id.history_quit)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -417,15 +421,116 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+    public static final int COUNT_YEAR_IN_HISTORY=3;
     private Bitmap makeHistoryGraph(){
+        HashMap<Integer,HashMap<Integer,Double>> data=prepareHistoryData();
+        Double maxSum=0.0;
+        List<Double> sums=new ArrayList<>();
+        List<Integer> years=new ArrayList<>();
+        List<Integer> months=new ArrayList<>();
+        for (HashMap.Entry<Integer,HashMap<Integer,Double>> entry1:data.entrySet()){
+            for (HashMap.Entry<Integer,Double> entry2:entry1.getValue().entrySet()){
+                sums.add(entry2.getValue());
+                years.add(entry1.getKey());
+                months.add(entry2.getKey());
+            }
+        }
+        int length=years.size();
+        if (maxSum==0.0){
+            maxSum=100.0;
+        }
+
+        final int HEIGHT=300;
+        final int textSize=15;
+        final int MONTH_OCCUPY_WIDTH=80;
+        final int TOP=(int)(HEIGHT*0.15),DOWN=(int)(HEIGHT*0.85);
+        final int WIDTH=length * MONTH_OCCUPY_WIDTH;
+
+        Bitmap bitmap=Bitmap.createBitmap(100,WIDTH,Bitmap.Config.ARGB_8888);
+        Canvas canvas=new Canvas(bitmap);
+
+        Paint linePaint=new Paint();
+        linePaint.setColor(getResources().getColor(R.color.colorPrimary));
+        linePaint.setAntiAlias(true);
+
+        Paint bgPaint=new Paint();
+        bgPaint.setAlpha(100);
+        bgPaint.setColor(getResources().getColor(R.color.colorGrey));
+
+        Paint textPaint=new Paint();
+        textPaint.setColor(getResources().getColor(R.color.colorBlack));
+        textPaint.setTextSize(textSize);
+
+        canvas.drawLine(0,DOWN,WIDTH,DOWN,textPaint);
+
+        return bitmap;
+    }
+    HashMap<Integer,HashMap<Integer,Double>> prepareHistoryData(){
+        HashMap<Integer,HashMap<Integer,Double>> map=new HashMap<>();
+        Calendar today=Calendar.getInstance();
+        int beginYear,beginMonth;
+        int todayYear=today.get(Calendar.YEAR);
+        int todayMonth=today.get(Calendar.MONTH)+1;
+        if (todayMonth ==12){
+            beginYear=todayYear-COUNT_YEAR_IN_HISTORY+1;
+            beginMonth=1;
+        }else {
+            beginYear=todayYear-COUNT_YEAR_IN_HISTORY;
+            beginMonth=todayMonth+1;
+        }
         String sql="select year,month,sum(amount) as sum from BillItem group by" +
                 " year,month order by year,month;";
         SQLiteDatabase database=Global.dbHelper.getReadableDatabase();
         Cursor cursor=database.rawQuery(sql,null);
-
-        return null;
+        boolean first=true;
+        int columnYear=cursor.getColumnIndex("year");
+        int columnMonth=cursor.getColumnIndex("month");
+        int columnSum=cursor.getColumnIndex("sum");
+        while (cursor.moveToNext()){
+            int year,month;
+            double sum;
+            year=cursor.getInt(columnYear);
+            month=cursor.getInt(columnMonth);
+            sum=cursor.getDouble(columnSum);
+            if (year < beginYear || year== beginYear && month <beginMonth){
+                continue;
+            }else if (year > todayYear || (year==todayYear && month >todayMonth)){
+                continue;
+            }
+            if (first){
+                first=false;
+                beginYear=year;
+                beginMonth=month;
+                if (beginYear==todayYear){
+                    map.put(beginYear,new HashMap<Integer, Double>());
+                    for(int i=beginMonth;i<=todayMonth;i++){
+                        map.get(beginYear).put(i,0.0);
+                    }
+                }else {
+                    for(int i=beginYear;i<=todayYear;i++){
+                        map.put(i,new HashMap<Integer, Double>());
+                        for(int j=1;j<=12;j++){
+                            if(i ==beginYear && j >=beginMonth){
+                                map.get(i).put(j,0.0);
+                            }else if (i==todayYear && j<=todayMonth){
+                                map.get(i).put(j,0.0);
+                            }else if( i>beginYear && i<todayYear){
+                                map.get(i).put(j,0.0);
+                            }
+                        }
+                    }
+                }
+            }
+            map.get(year).put(month,sum);
+        }
+        if (first){
+            map.put(todayYear,new HashMap<Integer, Double>());
+            map.get(todayYear).put(todayMonth,0.0);
+        }
+        Log.d(TAG, "prepareHistoryData: "+map);
+        cursor.close();
+        return map;
     }
-
     private final static String SELECT_ALL="select * from BillItem;";
     private  void backupData(){
         //手机和电脑连接不了，先不弄这个功能了

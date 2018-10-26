@@ -7,4 +7,5 @@
     <color name="colorGrey">#CCCCCC</color>
     <color name="colorSelect">#317918</color>
     <color name="colorNotSelect">#ffffff</color>
+    <color name="colorBlack">#000000</color>
 </resources>
